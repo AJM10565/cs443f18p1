@@ -12,6 +12,20 @@ import java.io.*;
 // If you update expected_block, you should receive the entire file, for "vanilla"
 // If you write the sanity checks, you should receive the entire file in all cases
 
+
+//fixing exception
+//implement hump
+//implement window size
+
+
+
+//wump stuff availble
+//port 417
+//lines 102-114
+//play around with sliding windows
+//extra credit options
+//w
+
 public class wclient {
 
     //============================================================
@@ -19,13 +33,33 @@ public class wclient {
 
     static public void main(String args[]) {
         int srcport;
-        int destport = wumppkt.SERVERPORT;
+        int destport = wumppkt.SERVERPORT; //defined in wumppkt; server is in 417; sends us with an ACK with a port number to accept
+        //from. 417 sends block to us, which tells the port where the handoff port. We can the rest of the transmission that what.
+        // 417 has no hand off port. Sends back the next block
+        // switch
         destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
-        String filename = "vanilla";
+        String filename = "vanilla"; //vanilla is a type of request for the server. each one results in a different problem. normal transfer; \\\
+
+        //4714
+        //dupdata2 DATA[2]
+        //lose
+        //spray
+        //delay
+        //
+
+
+
+
         String desthost = "ulam.cs.luc.edu";
-        int winsize = 1;
-        int latchport = 0;
-        short THEPROTO = wumppkt.BUMPPROTO;
+
+
+
+        int winsize = 1; //undergrad
+        int latchport = 0; //for hump  maybe
+        short THEPROTO = wumppkt.BUMPPROTO; // were usping bumpproto. NO INTERGERS. enum looking things only
+
+
+
         wumppkt.setproto(THEPROTO);
 
         if (args.length > 0) filename = args[0];
@@ -84,7 +118,7 @@ public class wclient {
                 = new DatagramPacket(new byte[wumppkt.MAXSIZE] , wumppkt.MAXSIZE);
         DatagramPacket ackDG = new DatagramPacket(new byte[0], 0);
         ackDG.setAddress(dest);
-        ackDG.setPort(destport);		// this is wrong for wumppkt.SERVERPORT version
+        ackDG.setPort(destport);		// this is wrong for wumppkt.SERVERPORT version...SERVERPORT will give us new port, which is why we need a new one.
 
         int expected_block = 1;
         long starttime = System.currentTimeMillis();
@@ -103,13 +137,14 @@ public class wclient {
 
         // if you want to implement HUMP, for better NAT-firewall traversal,
         // this is where that part goes. You also need to set THEPROTO=HUMPPROTO,
+
         // and use SERVERPORT, not SAMEPORT, above.
         // s.receive(replyDG), in the usual try-catch
-        // byte[] replybuf = replyDG.getData();
+        // byte[] replybuf = replyDG.getData(); like a handhalf. we need to send a ACK of that.
         // check that replybuf looks like a HANDOFF. If so:
         // wumppkt.HANDOFF handoff = new wumppkt.HANDOFF(replybuf);
         // int newport = handoff.newport();
-        // create ACK[0] and send it. Copy the ACK code towards the end of the main loop.
+        // create ACK[0] and send it. Copy the ACK code towards the end of the main loop. //
         // The port to send it too should be newport, extracted above.
 
         //====== MAIN LOOP ================================================
@@ -122,8 +157,11 @@ public class wclient {
             catch (SocketTimeoutException ste) {
                 System.err.println("hard timeout");
                 // what do you do here??; retransmit of previous packet here
-                //return;
-                continue;
+                continue; //right now creates a hard timeout
+
+                //we need to check the last
+
+                ///
             }
             catch (IOException ioe) {
                 System.err.println("receive() failed");
@@ -170,6 +208,8 @@ public class wclient {
             // latch on to port, if block == 1
 
             // write data
+
+
             System.out.write(data.bytes(), 0, data.size() - wumppkt.DHEADERSIZE);
 
             // send ack
