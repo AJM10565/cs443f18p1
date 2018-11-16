@@ -1,0 +1,330 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <title>WUMP Programming Project</title>
+</head>
+<body style="  color: black; background-color: beige;" vlink="#551a8b" link="#0000ee"
+      alink="#ff0000">
+<h2>WUMP Programming Project</h2>
+This program is to implement the BUMP client in java (or C#). Those
+registered for 343 are to do this with <span style="font-weight: bold;">window
+      size 1<strong></strong></span>; those registered for 443 should implement
+a more-or-less arbitrary window size [you can choose a fixed window size at
+compile time]. Here is an <a href="wumpproto.html">overview of the three
+    WUMP protocols</a> (BUMP, HUMP, and CHUMP). <br>
+<p> For the <strong>Java</strong> version, the files are below. I've made
+    some changes as of Nov 1, 2018; the older versions are still available
+    with "2017" in the name. The wumppkt file contains the packet-format
+    classes; the wclient file contains an outline of the actual program. The
+    2018 changes include cleaned-up inner-class definitions in wumppkt.java,
+    and more wumppkt support for the HUMP protocol. The inner-class fix is not
+    transparent; you cannot mix and match the 2017 and 2018 versions. If
+    you've started with the 2017 versions, I recommend sticking with them.</p>
+<div style="margin-left: 40px;">
+    <table width="100%" border="1">
+        <tbody>
+        <tr>
+            <td><a href="wumppkt.java">wumppkt.java</a> (2018)</td>
+            <td><a href="wumppkt2017.java">wumppkt2017.java</a></td>
+        </tr>
+        <tr>
+            <td><a href="wclient.java">wclient.java</a> (2018)</td>
+            <td><a href="wclient2017.java">wclient2017.java</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<p>The HUMP option is <em>the</em> best way to handle NAT firewalls, so I
+    recommend it strongly. More details are below.</p>
+<p>There is also a <strong>C#</strong> version, in <a href="wumppkt.cs">wumppkt.cs</a>
+    and <a href="wclient.cs">wclient.cs</a>. (These have <em>not</em> been
+    updated.) For either language, only the wclient file should be modified;
+    you should <i>not</i> have to make changes to wumppkt. </p>
+<p> </p>
+<p> Your assignment is to do the following, by modifying and extending the
+    wclient outline file: </p>
+<ol>
+    <li>Implement the basic transfer:</li>
+    <ul>
+        <li>Send the ACKs to the port from which Data[1] arrives; this involves
+            <span style="font-family: monospace;">ackDG.setPort()</span>. The
+            port, of course, will come from <span style="font-family: monospace;">replyDG.getPort()</span>.
+            You'll have to save this port number, of course.</li>
+        <li>The ack packet generated <em>is</em> an acknowledgement for <span
+                style="font-family: monospace;">expected_block</span>, but the
+            latter is never incremented: it always represents ACK[1]. Increment <span
+                    style="font-family: monospace;">expected_block</span> after each
+            received data packet (eventually you will want to do this only if the
+            data packet matches <span style="font-family: monospace;">expected_block</span>,
+            but, for the vanilla transfer, it always should). These two steps
+            should mean that the vanilla transfer works (if it still does not, try
+            running the program on campus and using the LUC Wi-Fi network).</li>
+    </ul>
+    <li>Add all appropriate packet sanity checks: timeouts, host/port, size,
+        opcode, and block number </li>
+    <li>Generate output. The transferred file is to be written to System.out.
+        A status message about every packet (listing size and block number) is
+        to be written to System.err. Do <span style="font-weight: bold;">not</span>
+        confuse these! </li>
+    <li>Terminate after a packet of size less than 512 is received </li>
+    <li>Implement an appropriate "dallying" strategy </li>
+    <li>send an ERROR packet if it receives a packet from the wrong port. The
+        appropriate ERRCODE in this case is EBADPORT.</li>
+    <li>If required, implement support for window sizes &gt; 1. </li>
+</ol>
+<p>It is helpful to view the description in terms of the state diagram. We
+    will use the states UNLATCHED, ESTABLISHED and DALLY used to describe TFTP
+    in <a href="http://intronetworks.cs.luc.edu/current/html/udp.html#tftp-states">intronetworks.cs.luc.edu/current/html/udp.html#tftp-states</a>.</p>
+<p style="margin-left: 40px;">UNLATCHED&nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp; Transition to ESTABLISHED on receipt of a valid Data[1]
+    packet (correct source IP address, etc)<br>
+    &nbsp;&nbsp;&nbsp; Save the source port as latchport</p>
+<p style="margin-left: 40px;">ESTABLISHED<br>
+    &nbsp;&nbsp;&nbsp; At any point we are expecting block expected_block<br>
+    &nbsp;&nbsp;&nbsp; If we receive a valid full-sized Data[N] packet with
+    N==expected_block, increment expected_block.<br>
+    &nbsp;&nbsp;&nbsp; The source port must match latchport.<br>
+    &nbsp;&nbsp;&nbsp; If we receive a valid Data[N] with N==expected_block
+    and with size &lt; 512 bytes, transition to DALLY</p>
+<p style="margin-left: 40px;">DALLY<br>
+    &nbsp;&nbsp;&nbsp; If we receive a valid Data[N] from the correct port,
+    with N == expected_block, resend the last ACK<br>
+    &nbsp;&nbsp;&nbsp; Exit this state after sufficient elapsed time</p>
+<ol>
+</ol>
+<h3>An outline of the program main loop, with notes, <a href="wump_client_outline.html">is
+    available here</a></h3>
+.
+<!--
+It may be possible to earn extra credit by implementing the HUMP or CHUMP protocol variants, althoughfor these you will have to work with me regarding the server side and so thisoption is available only by permission. You may also, with permission, earn extracredit for developing your own BUMP server.<p>-->
+I recommend that you implement this in phases, as follows.
+<ol>
+    <li>Implement the two steps above under "basic transfer". These are also
+        discussed below. This will mean that the vanilla transfer completes. </li>
+    <li>For each data packet received, write the data to System.out. (This is
+        now done for you.)<br>
+    </li>
+    <li>Add sanity checks, for (in order) host/port, packet size, opcode, and
+        block number. </li>
+    <li>Complete the process of latching on to the new port by making sure
+        that the first packet meets all the tests (sanity checks) for Data[1]
+        before you save its port number. You should also make sure the client
+        stops when a packet with less than 512 bytes of data is received.</li>
+    <li>Handle timeouts, by retransmitting the most recently sent packet when
+        the elapsed time exceeds a certain amount (2 seconds?). One way to do
+        this is to keep a DatagramPacket variable LastSent, which can either be
+        reqDG or ackDG, and just resend LastSent. Note that the response to an
+        InterruptedIOException, a "true" timeout, will simply be to continue the
+        loop again. </li>
+    <li> Add support for an dallying and error packets. After the client has
+        received the file, dallying means to wait something like two timeout
+        intervals (or more) to see if the final data packet is retransmitted. If
+        it is, it means that the final ACK was lost. The dally period gives the
+        client an opportunity to resend the final ACK. Error packets are to be
+        sent to any sender of an apparent data packet that comes from the wrong
+        port. </li>
+</ol>
+<p> You can test your program by contacting the server, ulam.cs.luc.edu, and
+    requesting files. If you contact on port 4515/4715, you get a response
+    from a new port (the standard behavior). This doesn't go through NAT
+    firewalls, so if you contact ulam2 on port 451<strong>6</strong>/471<strong>6</strong>
+    you get a response from the <em>same</em> port. No matter what file you
+    ask for, the file you get is always the same. The server on ports 451<strong>7</strong>/471<strong>7
+    </strong>offers experimental support for sliding windows. By asking port
+    4715 for the following names, you get the indicated behavior: </p>
+<p><strong>vanilla&nbsp;&nbsp; </strong>Normal transfer</p>
+<dl>
+</dl>
+<dl>
+    <dt> <strong>lose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </strong>Lose everything
+        after the first windowful (min 3). It will be retransmitted when you
+        retransmit the previous ACK. </dt>
+</dl>
+<dl>
+    <dt> <strong>spray&nbsp;&nbsp;&nbsp;&nbsp;</strong>Constant barrage of
+        data[1]. Implies LOSE too. In this case, no timeout events will occur;
+        you <i>must</i> check for elapsed time. </dt>
+    <dd><br>
+    </dd>
+    <dt> <strong>delay&nbsp; &nbsp; </strong>Delays sending packet 1,
+        prompting a duplicate REQ and thus results in multiple server instances
+        on multiple ports. </dt>
+    <dt><br>
+        <strong></strong></dt>
+    <dt><strong>reorder&nbsp; </strong>Sends the first windowful in the wrong
+        order. </dt>
+</dl>
+<br>
+<hr style="width: 27%; color: black; border-style: solid; margin-left: 0px; margin-right: auto;">
+<dl>
+    <dt>These behaviors are also available on 4515/4715:</dt>
+    <dt><br>
+    </dt>
+    <dt>dupdata2 </dt>
+    <dd> DATA[2] is sent twice </dd>
+    <dt> losedata2 </dt>
+    <dd> DATA[2] is lost on initial send, until you resend ACK[1] </dd>
+    <dt> marspacket </dt>
+    <dd> A packet from the wrong port (a "martian" port) arrives </dd>
+    <dt>badopcode </dt>
+    <dd>a packet arrives with an incorrect opcode </dd>
+    <dt>nofile </dt>
+    <dd>you get an error packet with a NO FILE error code. </dd>
+</dl>
+<p>At this point, the only special filenames that work on the "sameport"
+    ports (4516/4517/4716/4717) are <strong>vanilla</strong>, <strong>lose2</strong>
+    (losedata2), <strong>dup2</strong> (dupdata2) and <strong>spray</strong>.</p>
+<h3>The Basic Transfer</h3>
+<p>In order to get the basic vanilla transfer working, there are two things
+    you absolutely need to do, as outlined above:</p>
+<ul>
+    <li>send ACKs to the correct new port</li>
+    <li>make sure you send back ACKs with the correct block number</li>
+</ul>
+<p>If you run the existing wclient.java (with wumppkt.java), and you have
+    network access that doesn't block the necessary ports, your output should
+    look something like this:</p>
+<p style="margin-left: 40px;"><span style="font-family: monospace;">Looking
+        up address of ulam.cs.luc.edu... got it!<br>
+        req size = 12, filename=vanilla<br>
+        rec'd packet: len=520; proto=1; opcode=2; src=(10.0.0.1/60000); time=4<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DATA packet blocknum =
+        1<br>
+        An Assessment of the Programming Language Pascal<br>
+        by Niklaus Wirth, developer of Pascal<br>
+        <br>
+        1. What is reliable software?<br>
+        Reliable is the attribute for a person, an organization, or a mechanism<br>
+        that you can trust, that you can depend on, that is worthy of your<br>
+        confidence.&nbsp; For example, a reliable clock is one that indicates<br>
+        accurate time even during an earthquake, a reliable railway system is<br>
+        one where trains run punctually even during a snowstorm, a reliable<br>
+        bridge is a bridge that doesn't crack even under heahard timeout<br>
+        hard timeout<br>
+        hard timeout<br>
+        hard timeout<br>
+        hard timeout<br>
+        ...<br>
+      </span></p>
+<p>What's going on here is that the server sent you Data[1], but your ACK
+    didn't go to the right place, so it never sent you Data[2]. </p>
+<p>If you don't get Data[1], that is, you got nothing but error and status
+    messages, try uncommenting the SAMEPORT line, because most likely a NAT
+    router is blocking the Data[1] from a new port. If you do this, you will
+    get both Data[1] and Data[2], because your ACK[1] now <em>is</em> going
+    to the correct port (4715). But you won't get past Data[2], because you
+    are not yet ever sending ACK[2]. You will probably get multiple Data[2]
+    packets, because you will resend ACK[1] multiple times and each one will
+    trigger a new Data[2].</p>
+<p>The <strong>first step</strong> is to fix the ACK port, by appropriate
+    placement of something like</p>
+<p style="margin-left: 40px;">ackDG.setPort(thePort);</p>
+<p>(In general, you probably only want to set something like <span style="font-family: monospace;">latchport<em></em></span>,
+    on receipt of the first Data[1], as part of the process of latching on to
+    the initial port. However, at this point it won't matter if you set it on
+    every packet.) You can put this in with the other ackDG settings. At this
+    point, in the SERVERPORT case you should now get Data[1] and Data[2].
+    Because your repeated ACK[1]'s are now going to the correct port, you
+    should get multiple Data[2]'s, because each time you send ACK[1] the
+    server will respond with Data[2]. This behavior is quite similar, overall,
+    to that of the SAMEPORT setting without the above fix.</p>
+<p style="margin-left: 40px;">(If you're using the SAMEPORT case because
+    you're at home and you have a NAT router, that's fine, but you should
+    still make the above fix anyway, and then come in to Loyola to verify that
+    the SERVERPORT case works properly. Having the SERVERPORT case work is a
+    requirement.)</p>
+<p>The <strong>second step</strong> is to increment expected_block, so that
+    the arrival of Data[2] results in ACK[2] rather than ACK[1]. This is done
+    with</p>
+<p style="margin-left: 40px;"><span style="font-family: monospace;">expected_block++;</span></p>
+<p>You can put this anywhere <em>after</em> the line</p>
+<p style="margin-left: 40px;"><span style="font-family: monospace;">ack =
+        wp.new ACK(wumppkt.BUMPPROTO, expected_block);</span></p>
+<p>The line above creates an ack with the <em>current</em> expected_block,
+    and you want to update <span style="font-family: monospace;">expected_block</span>
+    for the <em>next</em> block. Alternatively, you can place a line</p>
+<p style="margin-left: 40px;"><span style="font-family: monospace;">expected_block
+        = data.blocknum();</span></p>
+<p><em>before</em> the ack creation, because this sets <span style="font-family: monospace;">expected_block</span>
+    to the block number of the block that just arrived.</p>
+<p>At this point you should get the entire file (11 blocks), with timeouts
+    at the end because you are not properly handling the end-of-transmission
+    case (last block has &lt; 512 bytes of data). Because repeated ACK[11]'s
+    don't trigger any new transmissions at the server side (why?), you won't
+    get multiple copies of the last packet.</p>
+<p>In general, you should verify that the arriving block number matches <span
+        style="font-family: monospace;">expected_block</span>, as part of other
+    sanity checks, before incrementing the latter. But you can worry about
+    that later. </p>
+<p>The next steps are to implement the sanity checks. The most important are
+    to check the incoming port and also the packet's block number (to see that
+    it matches expected_block), but you should also check the packet's IP
+    address and size and opcode (watch the order!). </p>
+<h3>Extra-Credit Options</h3>
+<p>Here are a few options for earning extra credit. In order to receive
+    extra credit, your project <em>must</em> be submitted by the due date.
+    You must also make it clear, <em>near the top of your wclient.java file</em>,
+    that you are submitting an extra-credit option. (I may add to this list if
+    I can think of others.)</p>
+<p>1. For undergrads only: implement sliding windows. A simple
+    implementation is <a href="http://intronetworks.cs.luc.edu/current/html/slidingwindows.html#simple-packet-based-sliding-windows-implementation">outlined
+        in the Sliding Windows chapter</a> of my book.</p>
+<p>2. Implement HUMP. This <em>should</em> work through all NAT firewalls,
+    and yet still have a new child port created for each connection. HUMP is
+    not particularly hard: after you send the REQ, the first packet you get
+    (which will come from the original server port) will be the handoff, which
+    tells you the handoff port. You then respond with ACK[0] to the handoff
+    port on the server, which then responds with Data[1].</p>
+<p>If the handoff packet is lost, the HUMP connection fails. I originally
+    thought this was a problem, but it seems to be a minor one compared to the
+    impact of NAT.</p>
+<p>Once you get basic WUMP working, HUMP involves </p>
+<ul>
+    <li>waiting for the HANDOFF packet instead of Data[1]. To do this, copy
+        the call to <span style="font-family: monospace;">s.receive(replyDG)</span>,
+        with the usual try/catch.</li>
+    <li>build the HANDOFF object from the received packet. First check the
+        protocol and opcode, and then call<br>
+        <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; wumppkt.HANDOFF
+          handoff = new wumppkt.HANDOFF(replybuf);</span> <br>
+        You might also want to check that the source port of replyDG is equal to
+        <span style="font-family: monospace;">destport</span>. </li>
+    <li>extracting the port number from the handoff packet. Do this with:<br>
+        <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; newport =
+          handoff.newport();</span></li>
+    <li>sending ACK[0] to that port. Do this with:<br>
+        <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; ack = new
+          wumppkt.ACK(0);&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; // creates ACK[0]
+          object<br>
+          &nbsp;&nbsp;&nbsp;
+          ackDG.setData(ack.write());&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // build the
+          packet<br>
+          &nbsp; &nbsp; ackDG.setLength(ack.size());<br>
+          &nbsp; &nbsp;
+          ackDG.setPort(newport);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          // set the port!<br>
+          &nbsp; &nbsp; try {s.send(ackDG);} catch ...&nbsp;&nbsp; // as usual</span></li>
+</ul>
+<div>This should all go <em>before</em> the main <span style="font-family: monospace;">while</span>
+    loop. If the HANDOFF packet doesn't arrive, and the <span style="font-family: monospace;">s.receive()</span>
+    times out in the first step above, I recommend exiting and trying again;
+    the packet likely got lost.</div>
+<div><br>
+</div>
+<div>At the start of wclient.java, you should also change <span style="font-family: monospace;">THEPROTO
+        = wumppkt.BUMPPROTO</span> to <span style="font-family: monospace;">THEPROTO
+        = wumppkt.<strong>H</strong>UMPPROTO</span>.</div>
+<p>3. Implement adaptive timeout. That is, measure the RTT of each packet,
+    and create a running average RTTmean, and then set the timeout interval
+    to, say, 2*RTTmean. You should probably set a minimum timeout of, say, 500
+    ms.</p>
+<p>If you're interested in this option, let me know and I'll create a larger
+    file to use for testing.</p>
+<p><br>
+</p>
+<dl>
+</dl>
+</body>
+</html>
