@@ -37,12 +37,12 @@ public class wclient {
         //from. 417 sends block to us, which tells the port where the handoff port. We can the rest of the transmission that what.
         // 417 has no hand off port. Sends back the next block
         // switch
-        destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
+        //destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
         String filename = "vanilla"; //vanilla is a type of request for the server. each one results in a different problem. normal transfer; \\\
-        filename = "lose"; //Lose everything after the first windowful (min 3). It will be retransmitted when you retransmit the previous ACK.
-        filename = "spray"; //Constant barrage of data[1]. Implies LOSE too. In this case, no timeout events will occur; you must check for elapsed time.
-        filename = "delay"; //Delays sending packet 1, prompting a duplicate REQ and thus results in multiple server instances on multiple ports.
-        filename = "reorder";//  Sends the first windowful in the wrong order.
+        // filename = "lose"; //Lose everything after the first windowful (min 3). It will be retransmitted when you retransmit the previous ACK.
+        // filename = "spray"; //Constant barrage of data[1]. Implies LOSE too. In this case, no timeout events will occur; you must check for elapsed time.
+        // filename = "delay"; //Delays sending packet 1, prompting a duplicate REQ and thus results in multiple server instances on multiple ports.
+        // filename = "reorder";//  Sends the first windowful in the wrong order.
         //4714
         //dupdata2 DATA[2]
         //lose
@@ -60,7 +60,7 @@ public class wclient {
         int winsize = 1; //undergrad
         int latchport = 0; //for hump  maybe
         short THEPROTO = wumppkt.BUMPPROTO; // were usping bumpproto. NO INTERGERS. enum looking things only
-
+        THEPROTO = wumppkt.HUMPPROTO;
 
 
         wumppkt.setproto(THEPROTO);
@@ -145,10 +145,72 @@ public class wclient {
 
         // and use SERVERPORT, not SAMEPORT, above.
         // s.receive(replyDG), in the usual try-catch
+        boolean sent = false;
+        while(!sent) {
+            try {
+                s.receive(replyDG);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            byte[] replybuf = replyDG.getData();
+            // first check proto and opcode then:
+            proto = wumppkt.proto(replybuf);
+            opcode = wumppkt.opcode(replybuf);
+            length = replyDG.getLength();
+            srcport = replyDG.getPort();
+            if (proto == THEPROTO && opcode == wumppkt.DATAop && srcport == wumppkt.SERVERPORT) {
+                wumppkt.HANDOFF handoff = new wumppkt.HANDOFF(replybuf);
+                int newport = handoff.newport();
+                ack = new wumppkt.ACK(0);        // creates ACK[0] object
+                ackDG.setData(ack.write());      // build the packet
+                ackDG.setLength(ack.size());
+                ackDG.setPort(newport);          // set the port!
+
+                try {
+                    s.send(ackDG);
+                    lastsent = ackDG;
+                    destport = newport;
+                    sent = true;
+
+
+
+                }
+                catch (SocketTimeoutException ste) {
+                    System.out.println(System.currentTimeMillis());
+                    System.err.println("hard timeout");
+                    // what do you do here??; retransmit of previous packet here
+
+
+
+
+
+                    //we need to check the last
+
+                    ///
+                }
+                catch (IOException ioe) {
+                    System.err.println("send() failed");
+                    return;
+                }
+
+            } else if (proto == THEPROTO && opcode == wumppkt.ERRORop) {
+                error = new wumppkt.ERROR(replybuf);
+            }
+
+        }
+
+
+
+
+
+
+
+
         // byte[] replybuf = replyDG.getData(); like a handhalf. we need to send a ACK of that.
         // check that replybuf looks like a HANDOFF. If so:
         // wumppkt.HANDOFF handoff = new wumppkt.HANDOFF(replybuf);
         // int newport = handoff.newport();
+
         // create ACK[0] and send it. Copy the ACK code towards the end of the main loop. //
         // The port to send it too should be newport, extracted above.
 
