@@ -40,6 +40,9 @@ public class wclient {
         destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
         String filename = "vanilla"; //vanilla is a type of request for the server. each one results in a different problem. normal transfer; \\\
         filename = "lose"; //Lose everything after the first windowful (min 3). It will be retransmitted when you retransmit the previous ACK.
+        filename = "spray"; //Constant barrage of data[1]. Implies LOSE too. In this case, no timeout events will occur; you must check for elapsed time.
+        filename = "delay"; //Delays sending packet 1, prompting a duplicate REQ and thus results in multiple server instances on multiple ports.
+        filename = "reorder";//  Sends the first windowful in the wrong order.
         //4714
         //dupdata2 DATA[2]
         //lose
