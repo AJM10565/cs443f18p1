@@ -39,7 +39,7 @@ public class wclient {
         // switch
         destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
         String filename = "vanilla"; //vanilla is a type of request for the server. each one results in a different problem. normal transfer; \\\
-
+        filename = "lose"; //Lose everything after the first windowful (min 3). It will be retransmitted when you retransmit the previous ACK.
         //4714
         //dupdata2 DATA[2]
         //lose
@@ -76,7 +76,7 @@ public class wclient {
         }
 
         try {
-            s.setSoTimeout(wumppkt.INITTIMEOUT);       // time in milliseconds
+            s.setSoTimeout(wumppkt.INITTIMEOUT);       // 3000 milliseconds
         } catch (SocketException se) {
             System.err.println("socket exception: timeout not set!");
         }
@@ -102,7 +102,7 @@ public class wclient {
         wumppkt.REQ req = new wumppkt.REQ(winsize, filename); // ctor for REQ
 
         System.err.println("req size = " + req.size() + ", filename=" + req.filename());
-
+        DatagramPacket lastsent;
         DatagramPacket reqDG
                 = new DatagramPacket(req.write(), req.size(), dest, destport);
         try {s.send(reqDG);}
@@ -110,6 +110,7 @@ public class wclient {
             System.err.println("send() failed");
             return;
         }
+        lastsent = reqDG;
 
         //============================================================
 
@@ -117,6 +118,7 @@ public class wclient {
         DatagramPacket replyDG            // we don't set the address here!
                 = new DatagramPacket(new byte[wumppkt.MAXSIZE] , wumppkt.MAXSIZE);
         DatagramPacket ackDG = new DatagramPacket(new byte[0], 0);
+
         ackDG.setAddress(dest);
         ackDG.setPort(destport);		// this is wrong for wumppkt.SERVERPORT version...SERVERPORT will give us new port, which is why we need a new one.
 
@@ -150,13 +152,27 @@ public class wclient {
         //====== MAIN LOOP ================================================
 
         while (true) {
+
+
+
+
+
+
             // get packet
             try {
                 s.receive(replyDG);
             }
             catch (SocketTimeoutException ste) {
+                System.out.println(System.currentTimeMillis());
                 System.err.println("hard timeout");
                 // what do you do here??; retransmit of previous packet here
+                try {s.send(lastsent);}
+                catch (IOException ioe) {
+                    System.err.println("send() failed");
+                    return;
+                }
+
+
                 continue; //right now creates a hard timeout
 
                 //we need to check the last
@@ -197,6 +213,8 @@ public class wclient {
             //write data, increment expected_block
             // exit if data size is < 512
 
+
+
             if (error != null) {
                 System.err.println("Error packet rec'd; code " + error.errcode());
                 continue;
@@ -222,7 +240,13 @@ public class wclient {
                 System.err.println("send() failed");
                 return;
             }
+            lastsent = ackDG;
             sendtime = System.currentTimeMillis();
+            if (length< 512){
+//                System.out.println(" ");
+//                System.out.println("We're breaking because the file is finished!");
+                break;
+            }
 
         } // while
     }
