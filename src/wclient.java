@@ -122,8 +122,8 @@ public class wclient {
             catch (SocketTimeoutException ste) {
                 System.err.println("hard timeout");
                 // what do you do here??; retransmit of previous packet here
-                return;
-                //continue;
+                //return;
+                continue;
             }
             catch (IOException ioe) {
                 System.err.println("receive() failed");
@@ -173,7 +173,7 @@ public class wclient {
             System.out.write(data.bytes(), 0, data.size() - wumppkt.DHEADERSIZE);
 
             // send ack
-            ack = new wumppkt.ACK(expected_block);
+            ack = new wumppkt.ACK(expected_block++);
             ackDG.setData(ack.write());
             ackDG.setLength(ack.size());
             ackDG.setPort(destport);
