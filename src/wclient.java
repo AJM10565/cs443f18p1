@@ -176,7 +176,7 @@ public class wclient {
             ack = new wumppkt.ACK(expected_block);
             ackDG.setData(ack.write());
             ackDG.setLength(ack.size());
-            //ackDG.setPort(??);
+            ackDG.setPort(destport);
             try {s.send(ackDG);}
             catch (IOException ioe) {
                 System.err.println("send() failed");
