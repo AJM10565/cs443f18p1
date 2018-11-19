@@ -16,7 +16,7 @@ import java.io.*;
 //fixing exception
 //implement hump
 //implement window size
-// This is a test
+
 
 
 //wump stuff availble
@@ -51,10 +51,7 @@ public class wclient {
         //
 
 
-
-
         String desthost = "ulam.cs.luc.edu";
-
 
 
         int winsize = 1; //undergrad
@@ -72,8 +69,7 @@ public class wclient {
         DatagramSocket s;
         try {
             s = new DatagramSocket();
-        }
-        catch (SocketException se) {
+        } catch (SocketException se) {
             System.err.println("no socket available");
             return;
         }
@@ -94,8 +90,7 @@ public class wclient {
         System.err.print("Looking up address of " + desthost + "...");
         try {
             dest = InetAddress.getByName(desthost);
-        }
-        catch (UnknownHostException uhe) {
+        } catch (UnknownHostException uhe) {
             System.err.println("unknown host: " + desthost);
             return;
         }
@@ -108,8 +103,9 @@ public class wclient {
         DatagramPacket lastsent;
         DatagramPacket reqDG
                 = new DatagramPacket(req.write(), req.size(), dest, destport);
-        try {s.send(reqDG);}
-        catch (IOException ioe) {
+        try {
+            s.send(reqDG);
+        } catch (IOException ioe) {
             System.err.println("send() failed");
             return;
         }
@@ -119,19 +115,19 @@ public class wclient {
 
         // now receive the response
         DatagramPacket replyDG            // we don't set the address here!
-                = new DatagramPacket(new byte[wumppkt.MAXSIZE] , wumppkt.MAXSIZE);
+                = new DatagramPacket(new byte[wumppkt.MAXSIZE], wumppkt.MAXSIZE);
         DatagramPacket ackDG = new DatagramPacket(new byte[0], 0);
 
         ackDG.setAddress(dest);
-        ackDG.setPort(destport);		// this is wrong for wumppkt.SERVERPORT version...SERVERPORT will give us new port, which is why we need a new one.
+        ackDG.setPort(destport);        // this is wrong for wumppkt.SERVERPORT version...SERVERPORT will give us new port, which is why we need a new one.
 
         int expected_block = 1;
         long starttime = System.currentTimeMillis();
         long sendtime = starttime;
 
-        wumppkt.DATA  data  = null;
+        wumppkt.DATA data = null;
         wumppkt.ERROR error = null;
-        wumppkt.ACK   ack   = new wumppkt.ACK(0);
+        wumppkt.ACK ack = new wumppkt.ACK(0);
 
         int proto;        // for proto of incoming packets
         int opcode;
@@ -146,10 +142,24 @@ public class wclient {
         // and use SERVERPORT, not SAMEPORT, above.
         // s.receive(replyDG), in the usual try-catch
         boolean sent = false;
-        while(!sent) {
+        while (!sent) {
             try {
                 s.receive(replyDG);
-            } catch (IOException e) {
+                System.err.println("received packet");
+            }catch (SocketTimeoutException ste) {
+                /*
+                try {
+                    s.send(lastsent);
+                } catch (IOException ioe) {
+                    System.err.println("send() failed");
+                    return;
+                }
+                /* */
+                System.out.println(System.currentTimeMillis()-starttime);
+                System.err.println("hard timeout");
+
+            } catch (IOException e)
+            {
                 e.printStackTrace();
             }
             byte[] replybuf = replyDG.getData();
@@ -158,13 +168,14 @@ public class wclient {
             opcode = wumppkt.opcode(replybuf);
             length = replyDG.getLength();
             srcport = replyDG.getPort();
-            if (proto == THEPROTO && opcode == wumppkt.DATAop && srcport == wumppkt.SERVERPORT) {
+            if (proto == THEPROTO && opcode == wumppkt.HANDOFFop && srcport == wumppkt.SERVERPORT) {
                 wumppkt.HANDOFF handoff = new wumppkt.HANDOFF(replybuf);
                 int newport = handoff.newport();
                 ack = new wumppkt.ACK(0);        // creates ACK[0] object
                 ackDG.setData(ack.write());      // build the packet
                 ackDG.setLength(ack.size());
                 ackDG.setPort(newport);          // set the port!
+                System.err.println("handoff port is "+newport);
 
                 try {
                     s.send(ackDG);
@@ -173,21 +184,16 @@ public class wclient {
                     sent = true;
 
 
-
-                }
-                catch (SocketTimeoutException ste) {
-                    System.out.println(System.currentTimeMillis());
-                    System.err.println("hard timeout");
-                    // what do you do here??; retransmit of previous packet here
-
-
-
-
-
-                    //we need to check the last
-
-                    ///
-                }
+                } //catch (SocketTimeoutException ste) {
+//                    System.out.println(System.currentTimeMillis());
+//                    System.err.println("hard timeout");
+//                    // what do you do here??; retransmit of previous packet here
+//
+//
+//                    //we need to check the last
+//
+//                    ///
+//                }
                 catch (IOException ioe) {
                     System.err.println("send() failed");
                     return;
@@ -195,15 +201,11 @@ public class wclient {
 
             } else if (proto == THEPROTO && opcode == wumppkt.ERRORop) {
                 error = new wumppkt.ERROR(replybuf);
+            } else {
+                System.err.println("received unknown packet while expecting handoff");
             }
 
         }
-
-
-
-
-
-
 
 
         // byte[] replybuf = replyDG.getData(); like a handhalf. we need to send a ACK of that.
@@ -219,103 +221,104 @@ public class wclient {
         while (true) {
 
 
+            if (System.currentTimeMillis() - sendtime >= wumppkt.INITTIMEOUT) {
+                // send ackDG again
+                sendtime = System.currentTimeMillis();
 
 
+                // get packet
+                try {
+                    s.receive(replyDG);
+                } catch (SocketTimeoutException ste) {
+                    System.out.println(System.currentTimeMillis());
+                    System.err.println("hard timeout");
+                    // what do you do here??; retransmit of previous packet here
+                    try {
+                        s.send(lastsent);
+                    } catch (IOException ioe) {
+                        System.err.println("send() failed");
+                        return;
+                    }
 
 
-            // get packet
-            try {
-                s.receive(replyDG);
-            }
-            catch (SocketTimeoutException ste) {
-                System.out.println(System.currentTimeMillis());
-                System.err.println("hard timeout");
-                // what do you do here??; retransmit of previous packet here
-                try {s.send(lastsent);}
-                catch (IOException ioe) {
-                    System.err.println("send() failed");
+                    continue; //right now creates a hard timeout
+
+                    //we need to check the last
+
+                    ///
+                } catch (IOException ioe) {
+                    System.err.println("receive() failed");
                     return;
                 }
 
+                byte[] replybuf = replyDG.getData();
+                proto = wumppkt.proto(replybuf);
+                opcode = wumppkt.opcode(replybuf);
+                length = replyDG.getLength();
+                srcport = replyDG.getPort();
 
-                continue; //right now creates a hard timeout
+                /* The new packet might not actually be a DATA packet.
+                 * But we can still build one and see, provided:
+                 *   1. proto =   THEPROTO
+                 *   2. opcode =  wumppkt.DATAop
+                 *   3. length >= wumppkt.DHEADERSIZE
+                 */
 
-                //we need to check the last
+                data = null;
+                error = null;
+                blocknum = 0;
+                if (proto == THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
+                    data = new wumppkt.DATA(replybuf, length);
+                    blocknum = data.blocknum();
+                } else if (proto == THEPROTO && opcode == wumppkt.ERRORop && length >= wumppkt.EHEADERSIZE) {
+                    error = new wumppkt.ERROR(replybuf);
+                }
 
-                ///
-            }
-            catch (IOException ioe) {
-                System.err.println("receive() failed");
-                return;
-            }
+                printInfo(replyDG, data, starttime);
 
-            byte[] replybuf = replyDG.getData();
-            proto   = wumppkt.proto(replybuf);
-            opcode  = wumppkt.opcode(replybuf);
-            length  = replyDG.getLength();
-            srcport = replyDG.getPort();
-
-            /* The new packet might not actually be a DATA packet.
-             * But we can still build one and see, provided:
-             *   1. proto =   THEPROTO
-             *   2. opcode =  wumppkt.DATAop
-             *   3. length >= wumppkt.DHEADERSIZE
-             */
-
-            data = null; error = null;
-            blocknum = 0;
-            if (  proto == THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
-                data = new wumppkt.DATA(replybuf, length);
-                blocknum = data.blocknum();
-            } else if ( proto == THEPROTO && opcode == wumppkt.ERRORop && length >= wumppkt.EHEADERSIZE) {
-                error = new wumppkt.ERROR(replybuf);
-            }
-
-            printInfo(replyDG, data, starttime);
-
-            // now check the packet for appropriateness
-            // if it passes all the checks:
-            //write data, increment expected_block
-            // exit if data size is < 512
+                // now check the packet for appropriateness
+                // if it passes all the checks:
+                //write data, increment expected_block
+                // exit if data size is < 512
 
 
+                if (error != null) {
+                    System.err.println("Error packet rec'd; code " + error.errcode());
+                    continue;
+                }
+                if (data == null) continue;        // typical error check, but you should
 
-            if (error != null) {
-                System.err.println("Error packet rec'd; code " + error.errcode());
-                continue;
-            }
-            if (data == null) continue;		// typical error check, but you should
+                // The following is for you to do:
+                // check port, packet size, type, block, etc
+                // latch on to port, if block == 1
 
-            // The following is for you to do:
-            // check port, packet size, type, block, etc
-            // latch on to port, if block == 1
-
-            // write data
+                // write data
 
 
-            System.out.write(data.bytes(), 0, data.size() - wumppkt.DHEADERSIZE);
+                System.out.write(data.bytes(), 0, data.size() - wumppkt.DHEADERSIZE);
 
-            // send ack
-            ack = new wumppkt.ACK(expected_block++);
-            ackDG.setData(ack.write());
-            ackDG.setLength(ack.size());
-            ackDG.setPort(destport);
-            try {s.send(ackDG);}
-            catch (IOException ioe) {
-                System.err.println("send() failed");
-                return;
-            }
-            lastsent = ackDG;
-            sendtime = System.currentTimeMillis();
-            if (length< 512){
+                // send ack
+                ack = new wumppkt.ACK(expected_block++);
+                ackDG.setData(ack.write());
+                ackDG.setLength(ack.size());
+                ackDG.setPort(destport);
+                try {
+                    s.send(ackDG);
+                } catch (IOException ioe) {
+                    System.err.println("send() failed");
+                    return;
+                }
+                lastsent = ackDG;
+                sendtime = System.currentTimeMillis();
+                if (length < 512) {
 //                System.out.println(" ");
 //                System.out.println("We're breaking because the file is finished!");
-                break;
-            }
+                    break;
+                }
 
-        } // while
+            } // while
+        }
     }
-
     // print packet length, protocol, opcode, source address/port, time, blocknum
     static public void printInfo(DatagramPacket pkt, wumppkt.DATA data, long starttime) {
         byte[] replybuf = pkt.getData();
