@@ -284,7 +284,7 @@ public class wclient {
                     System.out.println("recieved expected Data: " + M);
                     System.out.println("latchport: "+latchport);
                     int temp_expectedblock = expected_block;
-                    expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block);
+                    expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
                     if (expected_block < 0)
                     {
                         System.err.println("SW packet error: " + expected_block) ;
@@ -296,7 +296,7 @@ public class wclient {
                         while (HeadnotNull) {
                             data = EarlyArrivals.get(0);
                             if (data != null) {
-                                expected_block = printandack(replyDG,data,starttime,destport,socket,expected_block);
+                                expected_block = printandack(replyDG,data,starttime,destport,socket,expected_block,dest);
 
                                 for (int i = 1;i<EarlyArrivals.size();i++){ // shift over to left 1
                                     EarlyArrivals.add(i-1,EarlyArrivals.get(i));
@@ -321,7 +321,7 @@ public class wclient {
         }
     }
 
-    static public int printandack(DatagramPacket replyDG,wumppkt.DATA data,long starttime,int destport,DatagramSocket s, int expected_block){
+    static public int printandack(DatagramPacket replyDG,wumppkt.DATA data,long starttime,int destport,DatagramSocket s, int expected_block, InetAddress dest){
         printInfo(replyDG, data, starttime);
         byte[] replybuf = replyDG.getData();
         int proto = wumppkt.proto(replybuf);
@@ -349,6 +349,7 @@ public class wclient {
         ackDG.setData(ack.write());
         ackDG.setLength(ack.size());
         ackDG.setPort(destport);
+        ackDG.setAddress(dest);
 
 
         try {
