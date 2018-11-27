@@ -293,7 +293,7 @@ send ACK[LA]
 
 
                 //in this case E is LA plus 1
-                
+
                 if ((blocknum< E) || (blocknum > E + W)){
                     System.out.println("ignore packet: " + M);
                     continue;}
@@ -314,7 +314,7 @@ send ACK[LA]
                         continue;
 
                     }else {
-                        boolean HeadnotNull =true;
+                        boolean head =true;
                         do {
                             data = EarlyArrivals.get(0);
                             if (data != null) {
@@ -326,10 +326,10 @@ send ACK[LA]
                                 EarlyArrivals.add(EarlyArrivals.size(),null);
                             }
                             else {
-                                HeadnotNull=false;
+                                head=false;
 
                             }
-                        } while(HeadnotNull);
+                        } while(head);
                     }
 
                 }
