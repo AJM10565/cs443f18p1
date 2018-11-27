@@ -272,17 +272,39 @@ public class wclient {
 
                 int M = blocknum;
 
-                if ((M < E) || (M > E + W)){// Out of Bounds
-                    System.out.println("recieved Data out of window: " + M);
+                /*
+
+                Upon arrival of Data[M]:
+
+if M≤LA or M>LA+W, ignore the packet
+if M>LA+1, put the packet into EarlyArrivals.
+if M==LA+1:
+deliver the packet (that is, Data[LA+1]) to the application
+LA = LA+1 (slide window forward by 1)
+while (Data[LA+1] is in EarlyArrivals) {
+output Data[LA+1]
+LA = LA+1
+}
+send ACK[LA]
+
+
+
+                 */
+
+
+                //in this case E is LA plus 1
+                
+                if ((blocknum< E) || (blocknum > E + W)){
+                    System.out.println("ignore packet: " + M);
                     continue;}
-                if (M>E){ // Early but acceptable
-                    System.out.println("recieved Data, not expected, but in window: " + M);
+                if (blocknum>E){ // Early but acceptable
+                    System.out.println("put into Early arrivals " + M);
                     int index = blocknum-E;
                     EarlyArrivals.add(index,data);
                 }
-                if (M==E){ // Just right
+                if (blocknum==E){ // Just right
                     System.out.println("recieved expected Data: " + M);
-                    System.out.println("latchport: "+latchport);
+                    System.out.println("LP: "+latchport);
                     int temp_expectedblock = expected_block;
                     expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
                     if (expected_block < 0)
@@ -292,8 +314,8 @@ public class wclient {
                         continue;
 
                     }else {
-                        boolean HeadnotNull = true;
-                        while (HeadnotNull) {
+                        boolean HeadnotNull =true;
+                        do {
                             data = EarlyArrivals.get(0);
                             if (data != null) {
                                 expected_block = printandack(replyDG,data,starttime,destport,socket,expected_block,dest);
@@ -307,7 +329,7 @@ public class wclient {
                                 HeadnotNull=false;
 
                             }
-                        }
+                        } while(HeadnotNull);
                     }
 
                 }
