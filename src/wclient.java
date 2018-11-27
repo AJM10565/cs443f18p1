@@ -343,6 +343,10 @@ send ACK[LA]
         }
     }
 
+
+
+    //had to take Allan's advice and change this to a method. It was getting way to crazy up there ^^^
+
     static public int printandack(DatagramPacket replyDG,wumppkt.DATA data,long starttime,int destport,DatagramSocket s, int expected_block, InetAddress dest){
         printInfo(replyDG, data, starttime);
         byte[] replybuf = replyDG.getData();
@@ -393,6 +397,10 @@ send ACK[LA]
 
     }
     // print packet length, protocol, opcode, source address/port, time, blocknum
+
+
+
+
     static public void printInfo(DatagramPacket pkt, wumppkt.DATA data, long starttime) {
         byte[] replybuf = pkt.getData();
         int proto = wumppkt.proto(replybuf);
