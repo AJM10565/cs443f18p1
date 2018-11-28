@@ -253,6 +253,9 @@ public class wclient {
                 data = null;
                 error = null;
                 blocknum = 0;
+
+
+
                 if (proto == THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
                     data = new wumppkt.DATA(replybuf, length);
                     blocknum = data.blocknum();
@@ -354,6 +357,10 @@ send ACK[LA]
         int opcode = wumppkt.opcode(replybuf);
         int length = replyDG.getLength();
         wumppkt.ERROR error =null;
+
+
+        //sanuity checks 
+
         if (proto == wumppkt.THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
             data = new wumppkt.DATA(replybuf, length);
 
