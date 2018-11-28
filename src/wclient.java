@@ -273,7 +273,7 @@ public class wclient {
                     EarlyArrivals.add(null);
                 }
 
-                int M = blocknum;
+         
 
                 /*
 
@@ -298,15 +298,15 @@ send ACK[LA]
                 //in this case E is LA plus 1
 
                 if ((blocknum< E) || (blocknum > E + W)){
-                    System.out.println("ignore packet: " + M);
+                    System.out.println("ignore packet: " + blocknum);
                     continue;}
                 if (blocknum>E){ // Early but acceptable
-                    System.out.println("put into Early arrivals " + M);
+                    System.out.println("put into Early arrivals " + blocknum);
                     int index = blocknum-E;
                     EarlyArrivals.add(index,data);
                 }
                 if (blocknum==E){ // Just right
-                    System.out.println("recieved expected Data: " + M);
+                    System.out.println("recieved expected Data: " + blocknum);
                     System.out.println("LP: "+latchport);
                     int temp_expectedblock = expected_block;
                     expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
@@ -359,7 +359,7 @@ send ACK[LA]
         wumppkt.ERROR error =null;
 
 
-        //sanuity checks 
+        //sanuity checks
 
         if (proto == wumppkt.THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
             data = new wumppkt.DATA(replybuf, length);
