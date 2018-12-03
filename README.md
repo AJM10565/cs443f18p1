@@ -1,2 +1,4 @@
-# cs443f18p1
+# COMP 443: Networks Graduate Project 
+
+### Assignment: https://pld.cs.luc.edu/courses/443online/fall18/wump/
 HUMP Implementation
