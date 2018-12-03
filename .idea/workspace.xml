@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="24539f00-ad94-4d29-991a-b3e0005b9663" name="Default" comment="Issues with reorder">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/cs443f18p1/wclient.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/cs443f18p1/wclient.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/wclient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/wclient.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -26,24 +27,28 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="html" value="1" />
-          <entry key="java" value="8" />
+          <entry key="iml" value="1" />
+          <entry key="java" value="9" />
+          <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="HTML" value="1" />
-          <entry key="JAVA" value="8" />
+          <entry key="IDEA_MODULE" value="1" />
+          <entry key="JAVA" value="9" />
+          <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="java" value="3051" />
+          <entry key="java" value="3299" />
           <entry key="txt" value="213" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JAVA" value="3051" />
+          <entry key="JAVA" value="3299" />
           <entry key="PLAIN_TEXT" value="213" />
         </counts>
       </usages-collector>
@@ -54,8 +59,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/wclient.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="177">
-              <caret line="296" column="20" selection-start-line="296" selection-start-column="20" selection-end-line="296" selection-end-column="20" />
+            <state relative-caret-position="37">
+              <caret line="385" column="35" lean-forward="true" selection-start-line="385" selection-start-column="35" selection-end-line="385" selection-end-column="35" />
               <folding>
                 <element signature="e#0#15658#0" expanded="true" />
                 <element signature="imports" expanded="true" />
@@ -67,17 +72,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/util/ArrayList.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="40">
-              <caret line="447" selection-start-line="447" selection-end-line="447" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/net/DatagramPacket.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4950">
-              <caret line="371" column="6" selection-start-line="371" selection-start-column="6" selection-end-line="371" selection-end-column="6" />
+            <state relative-caret-position="189">
+              <caret line="431" column="13" selection-start-line="431" selection-start-column="13" selection-end-line="431" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -85,7 +81,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/wumppkt.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="659">
+            <state relative-caret-position="608">
               <caret line="76" selection-start-line="76" selection-end-line="76" />
               <folding>
                 <element signature="e#0#12550#0" expanded="true" />
@@ -109,8 +105,10 @@
       <find>hard</find>
       <find>s.</find>
       <find>socket</find>
-      <find>blocknum</find>
       <find>dest</find>
+      <find>blocknum</find>
+      <find>the</find>
+      <find>sent</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -163,11 +161,6 @@
               <item name="cs443f18p1" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="cs443f18p1" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cs443f18p1" type="462c0819:PsiDirectoryNode" />
-              <item name="WorkPlan" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -176,7 +169,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1543872268219" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1543875200521" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="configurable.group.build" />
   </component>
@@ -330,7 +323,21 @@
       <option name="project" value="LOCAL" />
       <updated>1543871156605</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Issues with reorder">
+      <created>1543872274303</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1543872274303</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Issues with reorder">
+      <created>1543872306577</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1543872306577</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -351,8 +358,8 @@
       <window_info anchor="bottom" id="SBT Console" order="0" weight="0.32882273" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" />
-      <window_info active="true" anchor="bottom" id="Run" order="3" visible="true" weight="0.48579162" />
-      <window_info anchor="bottom" id="Debug" order="4" weight="0.32882273" />
+      <window_info active="true" anchor="bottom" id="Run" order="3" visible="true" weight="0.7036536" />
+      <window_info anchor="bottom" id="Debug" order="4" weight="0.2571042" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="7" />
@@ -401,14 +408,20 @@
     </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/net/DatagramPacket.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4950">
+        <state relative-caret-position="483">
           <caret line="371" column="6" selection-start-line="371" selection-start-column="6" selection-end-line="371" selection-end-column="6" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/output.txt">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cs443f18p1.iml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/wumppkt.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="659">
+        <state relative-caret-position="608">
           <caret line="76" selection-start-line="76" selection-end-line="76" />
           <folding>
             <element signature="e#0#12550#0" expanded="true" />
@@ -418,15 +431,15 @@
     </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_181.jdk/Contents/Home/src.zip!/java/util/ArrayList.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="40">
-          <caret line="447" selection-start-line="447" selection-end-line="447" />
+        <state relative-caret-position="189">
+          <caret line="431" column="13" selection-start-line="431" selection-start-column="13" selection-end-line="431" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/wclient.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="296" column="20" selection-start-line="296" selection-start-column="20" selection-end-line="296" selection-end-column="20" />
+        <state relative-caret-position="37">
+          <caret line="385" column="35" lean-forward="true" selection-start-line="385" selection-start-column="35" selection-end-line="385" selection-end-column="35" />
           <folding>
             <element signature="e#0#15658#0" expanded="true" />
             <element signature="imports" expanded="true" />

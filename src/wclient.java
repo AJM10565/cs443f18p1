@@ -219,6 +219,7 @@ public class wclient {
         // The port to send it too should be newport, extracted above.
 
         //====== MAIN LOOP ================================================
+        blocknum = 0;
         int buffersize = winsize-1;
         ArrayList<wumppkt.DATA> EarlyArrivals = new ArrayList<wumppkt.DATA>(buffersize);
         for (int i = 0; i < buffersize; i++) {
@@ -256,7 +257,7 @@ public class wclient {
 
                 data = null;
                 error = null;
-                blocknum = 0;
+
                 if (proto == THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
                     data = new wumppkt.DATA(replybuf, length);
                     blocknum = data.blocknum();
@@ -277,34 +278,43 @@ public class wclient {
                     continue;}
                 if (M>E){ // Early but acceptable
 
-                    DisplayArraylistXContents(EarlyArrivals);
+
                     System.err.println("Recieved Data, not expected, but in window: " + M);
 
                     int index = blocknum-E-1;
 
-                    System.err.println("Attempting to add datapacket: " + index + " to EarlyArrivals.");
+                    System.err.println("Attempting to add datapacket: " + M + ", to index:"+ index + " in EarlyArrivals.");
                     EarlyArrivals.set(index, data);
-
+                    DisplayArraylistXContents(EarlyArrivals);
                 }
                 if (M==E){ // Just right
                     System.out.println("Recieved expected Data: " + M);
                     System.out.println("latchport: "+latchport);
                     int temp_expectedblock = expected_block;
                     expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
-                    System.out.println("Expected Block is: "+ expected_block);
+                    System.out.println("Expected Block is: "+ expected_block + "which should be 1 more than :" + temp_expectedblock);
 
 
                     if (expected_block < 0)
                     {
-                        System.err.println("SW packet error: " + expected_block) ;
+                        System.err.println("Sliding Windows packet data was null,  error code: " + expected_block) ;
                         expected_block = temp_expectedblock;
                         continue;
 
-                    }else {
+                    } else {
                         boolean HeadnotNull = true;
                         while (HeadnotNull) {
+
                             data = EarlyArrivals.get(0);
-                            System.err.println("This run is trying to print: " + data.blocknum());
+                            if (EarlyArrivals.get(0)!=null){
+                                System.err.println("The current data is " + data.blocknum());
+                            } else{
+                                System.err.println("Index: 0 is null!");
+                            }
+
+
+
+
                             if (data != null) {
                                 expected_block = printandack(replyDG,data,starttime,destport,socket,expected_block,dest);
 
@@ -349,24 +359,24 @@ public class wclient {
     }
 
     static public int printandack(DatagramPacket replyDG,wumppkt.DATA data,long starttime,int destport,DatagramSocket s, int expected_block, InetAddress dest){
-        printInfo(replyDG, data, starttime);
-        byte[] replybuf = replyDG.getData();
-        int proto = wumppkt.proto(replybuf);
-        int opcode = wumppkt.opcode(replybuf);
-        int length = replyDG.getLength();
-        wumppkt.ERROR error =null;
-        if (proto == wumppkt.THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
-            data = new wumppkt.DATA(replybuf, length);
-
-        } else if (proto == wumppkt.THEPROTO && opcode == wumppkt.ERRORop && length >= wumppkt.EHEADERSIZE) {
-            error = new wumppkt.ERROR(replybuf);
-        }
-
-        if (error != null) {
-            System.err.println("Error packet rec'd; code " + error.errcode());
-            return -1;
-        }
-        if (data == null) return -1;        // typical error check, but you should
+//        printInfo(replyDG, data, starttime);
+//        byte[] replybuf = replyDG.getData();
+//        int proto = wumppkt.proto(replybuf);
+//        int opcode = wumppkt.opcode(replybuf);
+//        int length = replyDG.getLength();
+//        wumppkt.ERROR error =null;
+//        if (proto == wumppkt.THEPROTO && opcode == wumppkt.DATAop && length >= wumppkt.DHEADERSIZE) {
+//            data = new wumppkt.DATA(replybuf, length);
+//
+//        } else if (proto == wumppkt.THEPROTO && opcode == wumppkt.ERRORop && length >= wumppkt.EHEADERSIZE) {
+//            error = new wumppkt.ERROR(replybuf);
+//        }
+//
+//        if (error != null) {
+//            System.err.println("Error packet rec'd; code " + error.errcode());
+//            return -1;
+//        }
+//        if (data == null) return -1;        // typical error check, but you should
 
         System.out.write(data.bytes(), 0, data.size() - wumppkt.DHEADERSIZE);
 
@@ -382,7 +392,7 @@ public class wclient {
         try {
             System.err.println("Trying to send ackDG: " + (expected_block-1));
             s.send(ackDG);
-            System.out.println("sent ackDG:" + (expected_block-1));
+            System.err.println("sent ackDG:" + (expected_block-1));
         } catch (IOException ioe) {
             System.err.println("send() failed");
             return -1;
