@@ -39,12 +39,12 @@ public class wclient {
         //from. 417 sends block to us, which tells the port where the handoff port. We can the rest of the transmission that what.
         // 417 has no hand off port. Sends back the next block
         // switch
-        //destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
+        // destport = wumppkt.SAMEPORT;		// 4716; server responds from same port
         String filename = "vanilla"; //vanilla is a type of request for the server. each one results in a different problem. normal transfer; \\\
         // filename = "lose"; //Lose everything after the first windowful (min 3). It will be retransmitted when you retransmit the previous ACK.
         // filename = "spray"; //Constant barrage of data[1]. Implies LOSE too. In this case, no timeout events will occur; you must check for elapsed time.
         // filename = "delay"; //Delays sending packet 1, prompting a duplicate REQ and thus results in multiple server instances on multiple ports.
-        // filename = "reorder";//  Sends the first windowful in the wrong order.
+        filename = "reorder";//  Sends the first windowful in the wrong order.
         //4714
         //dupdata2 DATA[2]
         //lose
@@ -219,7 +219,11 @@ public class wclient {
         // The port to send it too should be newport, extracted above.
 
         //====== MAIN LOOP ================================================
+        ArrayList<wumppkt.DATA> EarlyArrivals = new ArrayList<wumppkt.DATA>(winsize-3);
+        for (int i = 0; i < winsize; i++) {
+            EarlyArrivals.add(null);
 
+        }
         while (true) {
            int W = winsize;
            int E = expected_block;
@@ -265,10 +269,6 @@ public class wclient {
                 }
                 if (data == null) continue;
 
-                ArrayList<wumppkt.DATA> EarlyArrivals = new ArrayList<wumppkt.DATA>(W);
-                for (int i = 0; i < 10; i++) {
-                    EarlyArrivals.add(null);
-                }
 
                 int M = blocknum;
 
@@ -277,14 +277,37 @@ public class wclient {
                     continue;}
                 if (M>E){ // Early but acceptable
                     System.out.println("recieved Data, not expected, but in window: " + M);
-                    int index = blocknum-E;
-                    EarlyArrivals.add(index,data);
+                    int index = blocknum-E-1;
+
+                    System.err.println("Attempting to add datapacket: " + index + " to EarlyArrivals.");
+                    EarlyArrivals.set(index, data);
+                    // Print out the ArrayList Contents
+                    for (int EAI =0; EAI< EarlyArrivals.size();EAI++){
+                        if (EarlyArrivals.get(EAI) == null){
+                            System.err.println("Index: " + EAI + " is null; ");
+                        }
+                        else{
+                            System.err.println("Index: " + EAI +" is " +EarlyArrivals.get(EAI).blocknum());
+                        }
+                    }
                 }
                 if (M==E){ // Just right
                     System.out.println("recieved expected Data: " + M);
                     System.out.println("latchport: "+latchport);
                     int temp_expectedblock = expected_block;
                     expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
+                    System.out.println("Expected Block is: "+ expected_block);
+                    // Print out the ArrayList Contents
+                    for (int EAI =0; EAI< EarlyArrivals.size();EAI++){
+                        if (EarlyArrivals.get(EAI) == null){
+                            System.err.println("Index: " + EAI + " is null; ");
+                        }
+                        else{
+                            System.err.println("Index: " + EAI + EarlyArrivals.get(EAI).blocknum());
+                        }
+                    }
+
+                    // System.err.println("Index 0:" + EarlyArrivals.get(0).blocknum() +"Index 1:" + EarlyArrivals.get(1).blocknum()+"Index 2:" + EarlyArrivals.get(2).blocknum()+"Index 3:" + EarlyArrivals.get(3).blocknum()+"Index 4:" + EarlyArrivals.get(4).blocknum()+"Index 5:" + EarlyArrivals.get(5).blocknum()+"Index 6:" + EarlyArrivals.get(6).blocknum());
                     if (expected_block < 0)
                     {
                         System.err.println("SW packet error: " + expected_block) ;
@@ -304,6 +327,7 @@ public class wclient {
                                 EarlyArrivals.add(EarlyArrivals.size(),null);
                             }
                             else {
+                                System.err.println("Head is null");
                                 HeadnotNull=false;
 
                             }
