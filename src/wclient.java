@@ -219,10 +219,10 @@ public class wclient {
         // The port to send it too should be newport, extracted above.
 
         //====== MAIN LOOP ================================================
-        ArrayList<wumppkt.DATA> EarlyArrivals = new ArrayList<wumppkt.DATA>(winsize-3);
-        for (int i = 0; i < winsize; i++) {
+        int buffersize = winsize-1;
+        ArrayList<wumppkt.DATA> EarlyArrivals = new ArrayList<wumppkt.DATA>(buffersize);
+        for (int i = 0; i < buffersize; i++) {
             EarlyArrivals.add(null);
-
         }
         while (true) {
            int W = winsize;
@@ -276,12 +276,7 @@ public class wclient {
                     System.out.println("recieved Data out of window: " + M);
                     continue;}
                 if (M>E){ // Early but acceptable
-                    System.out.println("recieved Data, not expected, but in window: " + M);
-                    int index = blocknum-E-1;
 
-                    System.err.println("Attempting to add datapacket: " + index + " to EarlyArrivals.");
-                    EarlyArrivals.set(index, data);
-                    // Print out the ArrayList Contents
                     for (int EAI =0; EAI< EarlyArrivals.size();EAI++){
                         if (EarlyArrivals.get(EAI) == null){
                             System.err.println("Index: " + EAI + " is null; ");
@@ -290,6 +285,14 @@ public class wclient {
                             System.err.println("Index: " + EAI +" is " +EarlyArrivals.get(EAI).blocknum());
                         }
                     }
+                    System.out.println("recieved Data, not expected, but in window: " + M);
+
+                    int index = blocknum-E-1;
+
+                    System.err.println("Attempting to add datapacket: " + index + " to EarlyArrivals.");
+                    EarlyArrivals.set(index, data);
+                    // Print out the ArrayList Contents
+
                 }
                 if (M==E){ // Just right
                     System.out.println("recieved expected Data: " + M);
