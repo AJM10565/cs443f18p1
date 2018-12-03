@@ -273,25 +273,17 @@ public class wclient {
                 int M = blocknum;
 
                 if ((M < E) || (M > E + W)){// Out of Bounds
-                    System.out.println("recieved Data out of window: " + M);
+                    System.out.println("Recieved Data out of window: " + M);
                     continue;}
                 if (M>E){ // Early but acceptable
 
-                    for (int EAI =0; EAI< EarlyArrivals.size();EAI++){
-                        if (EarlyArrivals.get(EAI) == null){
-                            System.err.println("Index: " + EAI + " is null; ");
-                        }
-                        else{
-                            System.err.println("Index: " + EAI +" is " +EarlyArrivals.get(EAI).blocknum());
-                        }
-                    }
-                    System.out.println("recieved Data, not expected, but in window: " + M);
+                    DisplayArraylistXContents(EarlyArrivals);
+                    System.err.println("recieved Data, not expected, but in window: " + M);
 
                     int index = blocknum-E-1;
 
                     System.err.println("Attempting to add datapacket: " + index + " to EarlyArrivals.");
                     EarlyArrivals.set(index, data);
-                    // Print out the ArrayList Contents
 
                 }
                 if (M==E){ // Just right
@@ -300,17 +292,8 @@ public class wclient {
                     int temp_expectedblock = expected_block;
                     expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
                     System.out.println("Expected Block is: "+ expected_block);
-                    // Print out the ArrayList Contents
-                    for (int EAI =0; EAI< EarlyArrivals.size();EAI++){
-                        if (EarlyArrivals.get(EAI) == null){
-                            System.err.println("Index: " + EAI + " is null; ");
-                        }
-                        else{
-                            System.err.println("Index: " + EAI + EarlyArrivals.get(EAI).blocknum());
-                        }
-                    }
 
-                    // System.err.println("Index 0:" + EarlyArrivals.get(0).blocknum() +"Index 1:" + EarlyArrivals.get(1).blocknum()+"Index 2:" + EarlyArrivals.get(2).blocknum()+"Index 3:" + EarlyArrivals.get(3).blocknum()+"Index 4:" + EarlyArrivals.get(4).blocknum()+"Index 5:" + EarlyArrivals.get(5).blocknum()+"Index 6:" + EarlyArrivals.get(6).blocknum());
+
                     if (expected_block < 0)
                     {
                         System.err.println("SW packet error: " + expected_block) ;
@@ -321,6 +304,7 @@ public class wclient {
                         boolean HeadnotNull = true;
                         while (HeadnotNull) {
                             data = EarlyArrivals.get(0);
+                            System.err.println("This run is trying to print: " + data.blocknum());
                             if (data != null) {
                                 expected_block = printandack(replyDG,data,starttime,destport,socket,expected_block,dest);
 
@@ -328,6 +312,8 @@ public class wclient {
                                     EarlyArrivals.set(i-1,EarlyArrivals.get(i));
                                 }
                                 EarlyArrivals.set(EarlyArrivals.size()-1,null);
+                                DisplayArraylistXContents(EarlyArrivals);
+
                             }
                             else {
                                 System.err.println("Head is null");
@@ -346,6 +332,20 @@ public class wclient {
 
             }
         }
+    }
+
+
+    static public void DisplayArraylistXContents(ArrayList<wumppkt.DATA> list){
+        // Print out the ArrayList Contents
+        for (int EAI =0; EAI< list.size();EAI++){
+            if (list.get(EAI) == null){
+                System.err.println("Index: " + EAI + " is null; ");
+            }
+            else{
+                System.err.println("Index: " + EAI +" : " + list.get(EAI).blocknum());
+            }
+        }
+
     }
 
     static public int printandack(DatagramPacket replyDG,wumppkt.DATA data,long starttime,int destport,DatagramSocket s, int expected_block, InetAddress dest){
