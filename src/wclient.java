@@ -325,9 +325,9 @@ public class wclient {
                                 expected_block = printandack(replyDG,data,starttime,destport,socket,expected_block,dest);
 
                                 for (int i = 1;i<EarlyArrivals.size();i++){ // shift over to left 1
-                                    EarlyArrivals.add(i-1,EarlyArrivals.get(i));
+                                    EarlyArrivals.set(i-1,EarlyArrivals.get(i));
                                 }
-                                EarlyArrivals.add(EarlyArrivals.size(),null);
+                                EarlyArrivals.set(EarlyArrivals.size()-1,null);
                             }
                             else {
                                 System.err.println("Head is null");
