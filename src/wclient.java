@@ -278,7 +278,7 @@ public class wclient {
                 if (M>E){ // Early but acceptable
 
                     DisplayArraylistXContents(EarlyArrivals);
-                    System.err.println("recieved Data, not expected, but in window: " + M);
+                    System.err.println("Recieved Data, not expected, but in window: " + M);
 
                     int index = blocknum-E-1;
 
@@ -287,7 +287,7 @@ public class wclient {
 
                 }
                 if (M==E){ // Just right
-                    System.out.println("recieved expected Data: " + M);
+                    System.out.println("Recieved expected Data: " + M);
                     System.out.println("latchport: "+latchport);
                     int temp_expectedblock = expected_block;
                     expected_block = printandack(replyDG,data,starttime,latchport,socket,expected_block,dest);
